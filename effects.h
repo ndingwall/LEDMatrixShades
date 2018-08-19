@@ -11,7 +11,7 @@ void sines() {
   if (!effectInit) {
     switchDrawType(0, 0);
     effectInit = true;
-    effectDelay = 5;
+    effectDelay = 10;
   }
 
   static float incrval = 0;
@@ -31,8 +31,8 @@ void sines() {
     incr -= 0.001;
   }
 
-  if (incr > 0.5) incdir = 0;
-  if (incr < 0.1) incdir = 1;
+  if (incr > 0.2) incdir = 0;
+  if (incr < 0.05) incdir = 1;
 
 }
 
@@ -44,7 +44,7 @@ void Plasma() {
   if (!effectInit) {
     switchDrawType(0, 1);
     effectInit = true;
-    effectDelay = 1;
+    effectDelay = 10;
   }
   static int plasoffset = 0;
   static float offset  = 0;
@@ -65,8 +65,38 @@ void Plasma() {
 
 }
 
-#define fadeIncrement 0.9
-void fadeAllPWM() {
+
+// Random patches of bright
+
+void Patchy() {
+
+  if (!effectInit) {
+    switchDrawType(0, 1);
+    effectInit = true;
+    effectDelay = 20;
+  }
+  static float randX;
+  static float randY;
+  static float distance;
+  static float brightness;
+
+  for (byte i = 0; i < 100; i++) {
+    float randX = random(0, 24); 
+    float randY = random(0, 8);
+    for (int x = 0; x < 24; x++) {
+      for (int y = 0; y < 8; y++) {
+        double distance = sqrt(powf((x - randX), 2) + powf((y - randY), 2));
+        int brightness = ceil(256 * distance / 3);
+        GlassesPWM[x][y] = brightness;   // pgm_read_byte(&cie[brightness]);
+      }
+    }
+  }
+  writePWMFrame(0);
+
+}
+
+// #define fadeIncrement 0.9
+void fadeAllPWM(float fadeIncrement) {
   for (int x = 0; x < 24; x++) {
     for (int y = 0; y < 8; y++) {
       GlassesPWM[x][y] *= fadeIncrement;
@@ -100,7 +130,7 @@ void scrollMessage(byte message, byte mode) {
     if (mode != SCROLL2X) {
       effectDelay = 30;
     } else {
-      effectDelay = 7;
+      effectDelay = 9;
     }
   }
 
@@ -193,7 +223,7 @@ void starField() {
   }
 
 
-  fadeAllPWM();
+  fadeAllPWM(0.9);
   for (int i = 0; i < 10; i++) {
     if (abs(stars[i].xIncr) < 0.02 || abs(stars[i].yIncr) < 0.02) {
       stars[i].xPos = 11.5;
@@ -252,7 +282,7 @@ void slantBars() {
   if (!effectInit) {
     switchDrawType(0, 1);
     effectInit = true;
-    effectDelay = 8;
+    effectDelay = 25;
   }
 
   static int slantPos = 23;
@@ -270,6 +300,42 @@ void slantBars() {
 
 }
 
+void slantBarsSlow() {
+
+  if (!effectInit) {
+    switchDrawType(0, 1);
+    effectInit = true;
+    effectDelay = 35;
+  }
+
+  static int slantPos = 23;
+
+  for (int x = 0; x < 24; x++) {
+    for (int y = 0; y < 8; y++) {
+      GlassesPWM[x][y] = pgm_read_byte(&cie[(((x + y + (int)slantPos) % 16) * 16)]);
+    }
+  }
+
+  slantPos--;
+  if (slantPos < 0) slantPos = 46;
+
+  writePWMFrame(0);
+
+}
+
+void sparklesSlow() {
+
+  if (!effectInit) {
+    switchDrawType(0, 1);
+    effectInit = true;
+    effectDelay = 1;
+  }
+
+  for (int i = 0; i < 2; i++) GlassesPWM[random(0, 24)][random(0, 8)] = 255;
+  writePWMFrame(0);
+}
+
+
 void sparkles() {
 
   if (!effectInit) {
@@ -281,6 +347,7 @@ void sparkles() {
   for (int i = 0; i < 5; i++) GlassesPWM[random(0, 24)][random(0, 8)] = 255;
   writePWMFrame(0);
 }
+
 
 void rider() {
 
@@ -304,6 +371,34 @@ void rider() {
 
   riderPos += riderDir;
   if (riderPos > 10 || riderPos < -3 ) riderDir *= -1;
+
+  writePWMFrame(0);
+
+}
+
+
+void riderSlow() {
+
+  if (!effectInit) {
+    switchDrawType(0, 1);
+    effectInit = true;
+    effectDelay = 12;
+  }
+
+  static int riderPos = 0;
+  static int riderDir = 1;
+
+
+  for (int x = riderPos; x < (riderPos + 3); x++) {
+    if (x >= 0 && x < 24) {
+      for (int y = 0; y < 8; y++) {
+        GlassesPWM[x][y] = 255;
+      }
+    }
+  }
+
+  riderPos += riderDir;
+  if (riderPos > 23 || riderPos < -2 ) riderDir *= -1;
 
   writePWMFrame(0);
 
@@ -364,12 +459,12 @@ void fire() {
 }
 
 // Awww!
-void beatingHearts() {
+void beatingHeartsSlow() {
 
   if (!effectInit) {
     switchDrawType(0, 0);
     effectInit = true;
-    effectDelay = 60;
+    effectDelay = 150;
   }
 
   static byte currentHeartFrame = 0;
@@ -387,6 +482,33 @@ void beatingHearts() {
   writeBitFrame(0, 0);
 
 }
+
+
+// Awww!
+void beatingHearts() {
+
+  if (!effectInit) {
+    switchDrawType(0, 0);
+    effectInit = true;
+    effectDelay = 50;
+  }
+
+  static byte currentHeartFrame = 0;
+
+
+  if (currentHeartFrame < 3) {
+    loadGraphicsFrame(currentHeartFrame);
+  } else {
+    loadGraphicsFrame(5 - currentHeartFrame);
+  }
+
+  currentHeartFrame++;
+  if (currentHeartFrame > 5) currentHeartFrame = 0;
+
+  writeBitFrame(0, 0);
+
+}
+
 
 byte eqLevels[12] = {0};
 int eqDecay = 0;
@@ -477,11 +599,11 @@ void messageOne() {
 }
 
 void messageTwo() {
-  scrollMessage(1, SCROLL1X);
+  scrollMessage(1, SCROLL2X);
 }
 
 void messageThree() {
-  scrollMessage(2, SCROLL1X);
+  scrollMessage(2, SCROLL2X);
 }
 
 
@@ -533,7 +655,7 @@ void rampStrober() {
   if (!effectInit) {
     switchDrawType(0,0);
     effectInit = true;
-    effectDelay = 1;
+    effectDelay = 3;
     strobeDelay = 0;
     strobeCount = 25;
     strobeToggle = 0;

@@ -14,7 +14,7 @@
 unsigned long currentMillis = 0;
 unsigned long cycleMillis = 0;
 unsigned long effectMillis = 0;
-boolean autoCycle = true;
+boolean autoCycle = false;
 byte currentEffect = 0;
 
 // Data tables stored in flash memory
@@ -46,22 +46,28 @@ void setup() {
 
 
 // List of effects that will be displayed
-functionList effectList[] = { beatingHearts,
-                              messageOne,
-                              sparkles,
-                              spinGrayscale,
-                              //rampStrober,
-                              scrollingHearts,
-                              messageTwo,
-                              dualPlasma,
+functionList effectList[] = { // messageOne,
+                              // sparkles,
+                              // sparklesSlow,
+                              // Patchy,
+                              // spinGrayscale,
+                              // rampStrober,
+                              // scrollingHearts,
                               fakeEQ,
-                              blockyNoise,
+                              dualPlasma,
+                              // blockyNoise,
                               Plasma,
-                              rain,
+                              riderSlow,
+                              slantBarsSlow,
+                              beatingHeartsSlow,
+                              // rain,
+                              messageOne,
+                              messageTwo,
                               messageThree,
                               rider,
-                              sines,
-                              slantBars
+                              // sines,
+                              slantBars,
+                              beatingHearts
 };
 
 const byte numEffects = (sizeof(effectList)/sizeof(effectList[0]));
@@ -73,7 +79,10 @@ void loop()
   updateButtons();
   doButtons();
 
-  if (effectList[currentEffect] == rider || effectList[currentEffect] == sparkles) fadeAllPWM();
+  if (effectList[currentEffect] == rider || effectList[currentEffect] == sparkles) fadeAllPWM(0.9);
+  if (effectList[currentEffect] == riderSlow || effectList[currentEffect] == sparklesSlow) fadeAllPWM(0.84);
+  if (effectList[currentEffect] == Patchy) fadeAllPWM(0.84);
+
 
 
   // switch to a new effect every cycleTime milliseconds
